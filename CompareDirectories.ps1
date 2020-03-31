@@ -1,7 +1,7 @@
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string] $CopyTo, #Path where directory should be copied to
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string] $CopyFrom, #Path of the directory to copy
     [switch] $OutputMismatchOnly, #Don't show matching filenames
     [switch] $Copy, #copy files from "from" to "to" and append suffix if size differs
@@ -11,7 +11,7 @@ param(
     [switch] $OverWriteAll #Copies/Moves all files and overwrites conflicts
 )
 
-if($copy -and $move){
+if ($copy -and $move) {
     "Contradicting parameters '-Copy' and '-Move' only one action can be performed"
     "Exiting..."
     exit 
@@ -140,7 +140,7 @@ if ($Copy -Or $Move) {
         #Copy files in target but with different size
         foreach ($file in $check) {
 
-            $conflictFileName = $file.Name.ToString().Split(".")[0] + $suffix + $file.Name.ToString().Split(".")[1]
+            $conflictFileName = $file.Name.ToString().Split(".")[0] + $suffix + "." + $file.Name.ToString().Split(".")[1]
             $destination = Join-Path $pathTo $conflictFileName 
 
             if ($Move) {
