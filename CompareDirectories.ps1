@@ -23,7 +23,6 @@ foreach ($itemFrom in $listFrom) {
     $sizeDiffers = $false
 
     foreach ($itemTo in $listTo) {
-        #$index = 0
         
         if ($itemFrom.Name -eq $itemTo.Name) {
             $matched = $true        
@@ -33,11 +32,8 @@ foreach ($itemFrom in $listFrom) {
         }
 
         if ($matched) {
-            #$listTo.Remove($itemTo) #Reduce overhead
             break
         }
-
-        #$index++
     }
 
     if ($matched) {    
@@ -81,9 +77,9 @@ if (-Not $NoFileListsOutput) {
 }
 
 #Move and evenutally rename files
-if($Merge){
+if ($Merge) {
 
-    foreach($file in $notInTo){
+    foreach ($file in $notInTo) {
 
         Copy-Item -Path
     }
