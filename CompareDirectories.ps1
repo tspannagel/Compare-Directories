@@ -1,6 +1,7 @@
 param(
-    [Parameter(mandatory = $true)]
+    [Parameter(Mandatory=$true)]
     [string] $CopyTo, #Path where directory should be copied to
+    [Parameter(Mandatory=$true)]
     [string] $CopyFrom, #Path of the directory to copy
     [switch] $OutputMismatchOnly, #Don't show matching filenames
     [switch] $Copy, #copy files from "from" to "to" and append suffix if size differs
@@ -9,6 +10,12 @@ param(
     [string] $ConflictSuffix, #Suffix to append on files with same name, different sizes
     [switch] $OverWriteAll #Copies/Moves all files and overwrites conflicts
 )
+
+if($copy -and $move){
+    "Contradicting parameters '-Copy' and '-Move' only one action can be performed"
+    "Exiting..."
+    exit 
+}
 
 $pathTo = $CopyTo
 $pathFrom = $CopyFrom
