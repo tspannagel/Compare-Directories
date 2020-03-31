@@ -93,7 +93,7 @@ if ($Copy -Or $Move) {
     $suffix = "_conflict"
 
     #replace if provided
-    if ([String]::IsNullOrEmpty($ConflictSuffix)) {
+    if (-not  [String]::IsNullOrEmpty($ConflictSuffix)) {
         $suffix = $ConflictSuffix
     }
     
