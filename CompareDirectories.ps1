@@ -3,9 +3,11 @@ param(
     [string] $CopyTo, #Path where directory should be copied to
     [string] $CopyFrom, #Path of the directory to copy
     [switch] $OutputMismatchOnly, #Don't show matching filenames
-    [switch] $Merge, #copy files from "from" to "to" and append suffix if size differs
+    [switch] $Copy, #copy files from "from" to "to" and append suffix if size differs
     [switch] $NoFileListsOutput, #Dont't show any file lists in console 
-    [switch] $Move #move files instead of copy  
+    [switch] $Move, #move files instead of copy  
+    [string] $ConflictSuffix, #Suffix to append on files with same name, different sizes
+    [switch] $OverWriteAll #Copies/Moves all files and overwrites conflicts
 )
 
 $pathTo = $CopyTo
@@ -52,8 +54,8 @@ foreach ($itemFrom in $listFrom) {
 }
 
 if (-Not $NoFileListsOutput) {
-    if ($inTo.Count -gt 0 -and $OutputMismatchOnly) {
-        "The following files are already in $pathTo :"
+    if ($inTo.Count -gt 0 -and -not $OutputMismatchOnly) {
+        "The following files are already in $pathTo"
         foreach ($item in $inTo) {
             "`t" + $item.Fullname
         }
@@ -61,7 +63,7 @@ if (-Not $NoFileListsOutput) {
     }
 
     if ($check.Count -gt 0) {
-        "The following files are already in $pathTo :`n But differs in size!"
+        "The following files differ in size!`n "
         foreach ($item in $check) {
             "`t" + $check.FullName 
         }
@@ -69,7 +71,7 @@ if (-Not $NoFileListsOutput) {
     }
 
     if ($notInTo.Count -gt 0) {
-        "The following files are not in $pathTo :"
+        "The following files are not in $pathTo"
         foreach ($item in $notInTo) {
             "`t" + $item.Fullname
         }
@@ -77,33 +79,69 @@ if (-Not $NoFileListsOutput) {
     }
 }
 
-#Move and evenutally rename files
-if ($Merge -Or $Move) {
+#Move and eventually rename files
+if ($Copy -Or $Move) {
 
-    #Copy Files no in target
+    #default suffix
+    $suffix = "_conflict"
+
+    #replace if provided
+    if ([String]::IsNullOrEmpty($ConflictSuffix)) {
+        $suffix = $ConflictSuffix
+    }
+    
+    #Copy Files not in target
     foreach ($file in $notInTo) {
 
         $destination = Join-Path $pathTo $file.Name
 
-        if ($Move) {
+        if ($Move) {            
             Move-Item -Path $file.Fullname -Destination $destination
         }
         else {
             Copy-Item -Path $file.Fullname -Destination $destination
         }
     }
-    
-    #Copy files in target but with different size
-    foreach ($file in $notInTo) {
 
-        $conflictFileName = $file.Name.ToString().Split(".")[0] + "_conflict." + $file.Name.ToString().Split(".")[1]
-        $destination = Join-Path $pathTo $conflictFileName 
+    if ($OverWriteAll) {
+        #Copy Files in target
+        foreach ($file in $inTo) {
 
-        if ($Move) {
-            Move-Item -Path $file.Fullname -Destination $destination
+            $destination = Join-Path $pathTo $file.Name
+
+            if ($Move) {            
+                Move-Item -Path $file.Fullname -Destination $destination -Force
+            }
+            else {
+                Copy-Item -Path $file.Fullname -Destination $destination -Force
+            }
         }
-        else {
-            Copy-Item -Path $file.Fullname -Destination $destination
+        #Copy files in target but with different size
+        foreach ($file in $check) {
+
+            $destination = Join-Path $pathTo $file.Name
+    
+            if ($Move) {
+                Move-Item -Path $file.Fullname -Destination $destination -Force
+            }
+            else {
+                Copy-Item -Path $file.Fullname -Destination $destination -Force
+            }
+        }
+    }
+    else {
+        #Copy files in target but with different size
+        foreach ($file in $check) {
+
+            $conflictFileName = $file.Name.ToString().Split(".")[0] + $suffix + $file.Name.ToString().Split(".")[1]
+            $destination = Join-Path $pathTo $conflictFileName 
+
+            if ($Move) {
+                Move-Item -Path $file.Fullname -Destination $destination
+            }
+            else {
+                Copy-Item -Path $file.Fullname -Destination $destination
+            }
         }
     }
 }
