@@ -5,7 +5,7 @@ Compare and merge directories. Use at own risk!
 Provide only CopyTo and CopyFrom to simply compare the directories
 
 ```Console
-.\CompareDirectories.ps1 -CopyTo C:\temp\target -CopyFrom C:\temp\source 
+.\Compare-Directories.ps1 -CopyTo C:\temp\target -CopyFrom C:\temp\source 
 ```
 
 ### Parameters
